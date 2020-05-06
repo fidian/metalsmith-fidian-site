@@ -170,7 +170,7 @@ function doServe(settings) {
 
 function doMakeSugar(settings) {
     const sugarConfig = {
-        clean: true,
+        clean: settings.clean,
         destination: "./build",
         metadata: {}, // Cloned
         source: "./site"
@@ -211,13 +211,14 @@ function doPostProcess(settings) {
     }
 }
 
-function build(config, serve) {
+function build(config, serve, clean) {
     // Clear the require cache so we can reload content
     Object.keys(require.cache).forEach((key) => delete require.cache[key]);
     console.log('Build started');
     const startTime = Date.now();
 
     return Promise.resolve({
+        clean: clean,
         config: config,
         serve: serve
     })
@@ -248,7 +249,7 @@ module.exports = {
             const watch = require("glob-watcher");
             const reloadServer = livereload.createServer();
 
-            build(config, true).then(
+            build(config, true, true).then(
                 () => {
                     console.log(
                         "Server started, initial build complete, watching for changes"
@@ -263,18 +264,17 @@ module.exports = {
                             "./pages/**",
                             "./site/**"
                         ],
-                        () =>
-                            build(config, false, (err) => {
-                                if (err) {
-                                    console.error(err);
-                                }
-
+                        (done) =>
+                            build(config, false, false).then(() => {
                                 // Refreshing everything is better because then
                                 // hundreds or thousands of messages are not sent to
                                 // the client, causing the browser to trigger hundreds
                                 // or thousands of reloads and effectively freezing the
                                 // browser for several seconds.
                                 reloadServer.refresh("");
+                                done(err);
+                            }, (err) => {
+                                console.error(err);
                                 done(err);
                             })
                     );
@@ -284,7 +284,7 @@ module.exports = {
                 }
             );
         } else {
-            build(config, false, buildComplete);
+            build(config, false, true).then(buildComplete, buildComplete);
         }
     }
 };
