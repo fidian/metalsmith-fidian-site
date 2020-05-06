@@ -44,6 +44,10 @@ const metalsmithFidianSite = require('metalsmith-fidian-site');
 metalsmithFidianSite.run({
     baseDirectory: __dirname
     // Additional config goes here
+}, err => {
+    if (err) {
+        console.error(err);
+    }
 });
 ```
 
