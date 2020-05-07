@@ -1,6 +1,6 @@
 {
     "name": "@fidian/metalsmith-site",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "dependencies": {
         "debug": "^4.1.1",
         "glob-watcher": "^5.0.3",
