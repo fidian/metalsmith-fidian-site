@@ -98,7 +98,7 @@ function doLayouts(settingsInitial) {
                 data: ["./handlebars/layouts/data/**/*"],
                 decorators: ["./handlebars/layouts/decorators/**/*.js"],
                 helpers: ["./handlebars/layouts/helpers/**/*.js"],
-                layouts: ["./handlebars/layouts/"],
+                layouts: "./handlebars/layouts/",
                 partials: ["./handlebars/layouts/partials/**/*"]
             });
 
