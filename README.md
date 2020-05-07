@@ -62,6 +62,17 @@ For this to work, here is how the repository should be laid out.
 * `atomizer.[js,json]` - Atomizer configuration object. Without this file, atomizer won't run.
 * `build/` - Where files will be written. This file is created if it does not exist.
 * `default-metadata.[js,json]` - Results in an object used for each file's default metadata.
+* `handlebars/` - Stores the partials and helpers used for both the page generation and the layout wrapping.
+    * `pages/` - Partials and helpers used while content is changed to HTML.
+        * `data/` - Data files to load.
+        * `decorators/` - Handlebars decorators.
+        * `helpers/` - Functions to add.
+        * `partials/` - HTML templates.
+    * `layouts/` - Partials and helpers used exclusively for layout wrapping.
+        * `data/` - Data files to load.
+        * `decorators/` - Handlebars decorators.
+        * `helpers/` - Functions to add.
+        * `partials/` - HTML templates.
 * `metalsmith.js` - The file from above.
 * `node_modules/`
 * `package.json`
@@ -98,7 +109,7 @@ Hook functions execute before and after each step. First, `buildBefore` is calle
 * `serveBefore` (hook function, since 1.0.0)
 * `watch` (array of strings that specify file globs, since 1.0.0)
     Watches files and folders for changes when the server is enabled. When any changes are detected, a full site rebuild is performed.
-    Default: `['*.js', '*.json', 'layouts/**', 'pages/**', 'site/**']`
+    Default: `['*.js', '*.json', 'handlebars/**', 'site/**']`
 
 The optional `postProcess` function takes a single `done` callback. Your code can read files, perform additional processing, or fulfill any needs in order to complete the build. When you're ready and the file modifications are complete, call `done()`. At this point, there is no Metalsmith instance and the files will have been written to `build/`.
 

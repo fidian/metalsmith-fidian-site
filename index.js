@@ -78,10 +78,10 @@ function doContents(settingsInitial) {
         .then(runHook("contentsBefore"))
         .then((settings) => {
             settings.sugar.use("metalsmith-handlebars-contents", {
-                data: ["./pages/data/**/*"],
-                decorators: ["./pages/decorators/**/*.js"],
-                helpers: ["./pages/helpers/**/*.js"],
-                partials: ["./pages/partials/**/*"]
+                data: ["./handlebars/pages/data/**/*"],
+                decorators: ["./handlebars/pages/decorators/**/*.js"],
+                helpers: ["./handlebars/pages/helpers/**/*.js"],
+                partials: ["./handlebars/pages/partials/**/*"]
             });
             settings.sugar.use("metalsmith-markdown");
             settings.sugar.use("metalsmith-rename", [[/\.md$/, ".html"]]);
@@ -95,10 +95,10 @@ function doLayouts(settingsInitial) {
         .then(runHook("layoutsBefore"))
         .then((settings) => {
             settings.sugar.use("metalsmith-handlebars-layouts", {
-                data: ["./layouts/data/**/*"],
-                decorators: ["./layouts/decorators/**/*.js"],
-                helpers: ["./layouts/helpers/**/*.js"],
-                partials: ["./layouts/partials/**/*"]
+                data: ["./handlebars/layouts/data/**/*"],
+                decorators: ["./handlebars/layouts/decorators/**/*.js"],
+                helpers: ["./handlebars/layouts/helpers/**/*.js"],
+                partials: ["./handlebars/layouts/partials/**/*"]
             });
 
             return settings;
@@ -260,8 +260,7 @@ module.exports = {
                         config.watch || [
                             "./*.js",
                             "./*.json",
-                            "./layouts/**",
-                            "./pages/**",
+                            "./handlebars/**",
                             "./site/**"
                         ],
                         (done) =>
