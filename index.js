@@ -152,7 +152,7 @@ function doServe(settings) {
         return Promise.resolve(settings)
             .then(runHook("serveBefore"))
             .then((settings) => {
-                settings.sugar.use("metalsmith-serve", {
+                settings.sugar.use("@fidian/metalsmith-serve", {
                     http_error_files: {
                         404: "/404.html"
                     }
