@@ -121,7 +121,7 @@ function doCss(settingsInitial) {
             );
         })
         .then((settings) => {
-            settings.sugar.use("metalsmith-less", { removeSource: true });
+            settings.sugar.use("@fidian/metalsmith-less", { removeSource: true });
 
             return settings;
         })
