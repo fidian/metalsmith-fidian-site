@@ -1,6 +1,6 @@
 const metalsmithSugar = require("metalsmith-sugar");
 const path = require("path");
-const debug = require("debug")("metalsmith-fidian-site");
+const debug = require("debug")("metalsmith-site");
 
 function runHook(name) {
     return (settings) => {
@@ -121,10 +121,7 @@ function doCss(settingsInitial) {
             );
         })
         .then((settings) => {
-            settings.sugar.use("metalsmith-less"); // Leaves behind *.less files
-            settings.sugar.use("metalsmith-move-remove", {
-                remove: [".*\\.less$"]
-            });
+            settings.sugar.use("metalsmith-less", { removeSource: true });
 
             return settings;
         })
@@ -137,7 +134,7 @@ function doRedirects(settingsInitial) {
         .then((settings) => {
             return req("redirects").then(
                 (redirects) => {
-                    settings.sugar.use("metalsmith-redirect", {
+                    settings.sugar.use("@fidian/metalsmith-redirect", {
                         htmlExtensions: [".htm", ".html"],
                         redirections: redirects
                     });
@@ -172,9 +169,9 @@ function doServe(settings) {
 function doMakeSugar(settings) {
     const sugarConfig = {
         clean: settings.clean,
-        destination: "./build",
+        destination: settings.config.destination || "./build",
         metadata: {}, // Cloned
-        source: "./site"
+        source: settings.config.source || "./site"
     };
 
     if (settings.config.baseDirectory) {
@@ -215,7 +212,7 @@ function doPostProcess(settings) {
 function build(config, serve, clean) {
     // Clear the require cache so we can reload content
     Object.keys(require.cache).forEach((key) => delete require.cache[key]);
-    console.log('Build started');
+    console.log("Build started");
     const startTime = Date.now();
 
     return Promise.resolve({
@@ -265,18 +262,21 @@ module.exports = {
                             "./site/**"
                         ],
                         (done) =>
-                            build(config, false, false).then(() => {
-                                // Refreshing everything is better because then
-                                // hundreds or thousands of messages are not sent to
-                                // the client, causing the browser to trigger hundreds
-                                // or thousands of reloads and effectively freezing the
-                                // browser for several seconds.
-                                reloadServer.refresh("");
-                                done(err);
-                            }, (err) => {
-                                console.error(err);
-                                done(err);
-                            })
+                            build(config, false, false).then(
+                                () => {
+                                    // Refreshing everything is better because then
+                                    // hundreds or thousands of messages are not sent to
+                                    // the client, causing the browser to trigger hundreds
+                                    // or thousands of reloads and effectively freezing the
+                                    // browser for several seconds.
+                                    reloadServer.refresh("");
+                                    done(err);
+                                },
+                                (err) => {
+                                    console.error(err);
+                                    done(err);
+                                }
+                            )
                     );
                 },
                 (err) => {

@@ -1,5 +1,5 @@
-metalsmith-fidian-site
-======================
+@fidian/metalsmith-site
+=======================
 
 When trying to get started with a simple [Metalsmith] site, I want a certain setup to exist.
 
@@ -21,7 +21,7 @@ Installation
 First, install the package.
 
 ```bash
-npm install --save metalsmith-fidian-site
+npm install --save @fidian/metalsmith-site
 ```
 
 Add some helpful scripts to your `package.json`.
@@ -31,7 +31,7 @@ Add some helpful scripts to your `package.json`.
     ...
     "scripts": {
         "build": "node metalsmith.js",
-        "start": "SERVE=true metalsmith-fidian-site"
+        "start": "SERVE=true node metalsmith.js"
     }
     ...
 }
@@ -40,8 +40,8 @@ Add some helpful scripts to your `package.json`.
 Finally, create this boilerplate `metalsmith.js`.
 
 ```js
-const metalsmithFidianSite = require('metalsmith-fidian-site');
-metalsmithFidianSite.run({
+const metalsmithSite = require('@fidian/metalsmith-site');
+metalsmithSite.run({
     baseDirectory: __dirname
     // Additional config goes here
 }, err => {
@@ -76,44 +76,52 @@ For this to work, here is how the repository should be laid out.
 * `metalsmith.js` - The file from above.
 * `node_modules/`
 * `package.json`
-* `redirects.[js.json]` - Write redirect files to your project. This file generates an object whose keys are the filenames to create and the values are where to redirect. Redirections can be relative to the file or root-relative.
+* `redirects.[js,json]` - Write redirect files to your project. This file generates an object whose keys are the filenames to create and the values are where to redirect. Redirections can be relative to the file or root-relative.
 * `site/` - Your source files for the site.
 
 
 Configuration
 -------------
 
-Hook functions execute before and after each step. First, `buildBefore` is called, then the hooks for `metadata`, `contents`, `layouts`, `css`, `redirects`, `serve` (may not be called if not serving files), and finally the `buildAfter` hook.
+These are all properties that control normal settings.
 
 * `baseDirectory` (string, since 1.0.0)
     The folder to use as the base. Typically uses `metalsmith-sugar` and it uses `../../..`, which should resolve to your project's root. If that's not working, you could simply set this to `__dirname`, as is done in the example.
     Default: `../../..` from the folder of `metalsmith-sugar`.
-* `buildAfter` (hook function, since 1.0.0)
-* `buildBefore` (hook function, since 1.0.0)
-* `contentsAfter` (hook function, since 1.0.0)
-* `contentsBefore` (hook function, since 1.0.0)
-* `cssAfter` (hook function, since 1.0.0)
-* `cssBefore` (hook function, since 1.0.0)
-* `layoutsAfter` (hook function, since 1.0.0)
-* `layoutsBefore` (hook function, since 1.0.0)
-* `metadataAfter` (hook function, since 1.0.0)
-* `metadataBefore` (hook function, since 1.0.0)
-* `postProcess` (callback function, since 1.0.0)
-    How to add a bit of processing after each build. Details below.
-* `redirectsAfter` (hook function, since 1.0.0)
-* `redirectsBefore` (hook function, since 1.0.0)
+* `destination` (since 1.2.0)
+    Where generated files are placed.
+    Default: `./build`
 * `serve` (boolean, since 1.0.0)
     When enabled, the site is served on port 8080 (default). This setting can also be enabled by setting the `SERVE` environment variable to any non-empty string.
     Default: `false`
-* `serveAfter` (hook function, since 1.0.0)
-* `serveBefore` (hook function, since 1.0.0)
+* `source` (since 1.2.0)
+    The files that are loaded into the build system.
+    Default: `./site`
 * `watch` (array of strings that specify file globs, since 1.0.0)
     Watches files and folders for changes when the server is enabled. When any changes are detected, a full site rebuild is performed.
     Default: `['*.js', '*.json', 'handlebars/**', 'site/**']`
 
-The optional `postProcess` function takes a single `done` callback. Your code can read files, perform additional processing, or fulfill any needs in order to complete the build. When you're ready and the file modifications are complete, call `done()`. At this point, there is no Metalsmith instance and the files will have been written to `build/`.
+There's also the following properties that are hook functions. They are executed before and after each step, in the following order. Note that the `serve` step (and thus `serveBefore` and `serveAfter`) may not be executed if not serving. All of these hook functions are expected to take a single argument, the instance of `metalsmith-sugar` in order to add additional plugins. The function can optionally return a `Promise` in case the plugin can't be added synchronously.
 
-All of the hook functions are expected to take a single argument, the instance of `metalsmith-sugar` in order to add additional plugins. The function can optionally return a `Promise` in case the plugin can't be added synchronously.
+* `buildBefore` (hook function, since 1.0.0)
+* `metadataBefore` (hook function, since 1.0.0)
+* `metadataAfter` (hook function, since 1.0.0)
+* `contentsBefore` (hook function, since 1.0.0)
+* `contentsAfter` (hook function, since 1.0.0)
+* `layoutsBefore` (hook function, since 1.0.0)
+* `layoutsAfter` (hook function, since 1.0.0)
+* `cssBefore` (hook function, since 1.0.0)
+* `cssAfter` (hook function, since 1.0.0)
+* `redirectsBefore` (hook function, since 1.0.0)
+* `redirectsAfter` (hook function, since 1.0.0)
+* `serveBefore` (hook function, since 1.0.0)
+* `serveAfter` (hook function, since 1.0.0)
+* `buildAfter` (hook function, since 1.0.0)
+
+Also, there's a special hook that takes a single `done` callback. Your code can read files, perform additional processing, or fulfill any needs in order to complete the build. When you're ready and the file modifications are complete, call `done()`. At this point, there is no Metalsmith instance and the files will have been written to `build/`.
+
+* `postProcess` (callback function, since 1.0.0)
+    How to add a bit of processing after each build. Details below.
 
 
 API
@@ -123,10 +131,70 @@ API
     Starts a build of Metalsmith or starts the server. The `buildComplete` function is called whenever any build is finished, including the live reload builds.
 
 
+Recipes
+-------
+
+
+### Modifying metadata
+
+If you want to have dynamic metadata, such as adding a build date, you can accomplish the goal with the `metadataAfter` hook.
+
+```
+const metalsmithSite = require('@fidian/metalsmith-site');
+metalsmithSite.run({
+    baseDirectory: __dirname
+    metadataAfter: (sugar) => {
+        sugar.use((files, metalsmith, done) => {
+            // Access the metadata object with metalsmith._metadata
+            metalsmith._metadata.buildDate = new Date();
+            done();
+        });
+    }
+}, err => {
+    if (err) {
+        console.error(err);
+    }
+});
+```
+
+
+### Setting the default layout for all pages
+
+Pages can each specify a layout, which will override the global layout property.
+
+Edit `default-metadata.json`:
+
+```
+{
+    "layout": "default-layout"
+}
+```
+
+This will wrap all pages in the Mustache template stored as `handlebars/layouts/default-layout.html`. If you want to change one page's layout, you can do that by editing the file's metadata.
+
+```
+---
+title: Sample page that changes the layout
+layout: changed-layout
+---
+
+Your Markdown goes here for a page. It will be inserted into the layout file `handlebars/layouts/changed-layout.html`.
+```
+
+Here's a sample layout file. Note that we use triple braces for `{{{contents}}}` so the HTML isn't escaped.
+
+```
+<!DOCTYPE html>
+<html><head><title>{{title}}</title></head>
+<body>{{{contents}}}</body>
+</html>
+```
+
+
 Debugging
 ---------
 
-This uses `debug`, so use the `DEBUG` environment variable when running a build to see lots of output. Most of the other plugins do the same. You can see all output by using `DEBUG='*' npm run build` or simply this library's output with `DEBUG=metalsmith-fidian-site npm run build`.
+This uses `debug`, so use the `DEBUG` environment variable when running a build to see lots of output. Most of the other plugins do the same. You can see all output by using `DEBUG='*' npm run build` or simply this library's output with `DEBUG=metalsmith-site npm run build`.
 
 
 [Metalsmith]: https://metalsmith.io
