@@ -50,12 +50,14 @@ function doMetadata(settingsInitial) {
         .then((settings) => {
             return req("default-metadata").then(
                 (metadata) => {
-                    settings.sugar.use("metalsmith-default-values", [
-                        {
-                            pattern: "**/*",
-                            defaults: metadata
-                        }
-                    ]);
+                    settings.sugar.use(
+                        require("metalsmith-default-values")([
+                            {
+                                pattern: "**/*",
+                                defaults: metadata
+                            }
+                        ])
+                    );
 
                     return settings;
                 },
@@ -63,10 +65,10 @@ function doMetadata(settingsInitial) {
             );
         })
         .then((settings) => {
-            settings.sugar.use("metalsmith-data-loader");
-            settings.sugar.use("metalsmith-ancestry");
-            settings.sugar.use("metalsmith-relative-links");
-            settings.sugar.use("metalsmith-rootpath");
+            settings.sugar.use(require("metalsmith-data-loader")());
+            settings.sugar.use(require("metalsmith-ancestry")());
+            settings.sugar.use(require("metalsmith-relative-links")());
+            settings.sugar.use(require("metalsmith-rootpath")());
 
             return settings;
         })
@@ -77,14 +79,18 @@ function doContents(settingsInitial) {
     return Promise.resolve(settingsInitial)
         .then(runHook("contentsBefore"))
         .then((settings) => {
-            settings.sugar.use("metalsmith-handlebars-contents", {
-                data: ["./handlebars/pages/data/**/*"],
-                decorators: ["./handlebars/pages/decorators/**/*.js"],
-                helpers: ["./handlebars/pages/helpers/**/*.js"],
-                partials: ["./handlebars/pages/partials/**/*"]
-            });
-            settings.sugar.use("metalsmith-markdown");
-            settings.sugar.use("metalsmith-rename", [[/\.md$/, ".html"]]);
+            settings.sugar.use(
+                require("metalsmith-handlebars-contents")({
+                    data: ["./handlebars/pages/data/**/*"],
+                    decorators: ["./handlebars/pages/decorators/**/*.js"],
+                    helpers: ["./handlebars/pages/helpers/**/*.js"],
+                    partials: ["./handlebars/pages/partials/**/*"]
+                })
+            );
+            settings.sugar.use(require("metalsmith-markdown")());
+            settings.sugar.use(
+                require("metalsmith-rename")([[/\.md$/, ".html"]])
+            );
             return settings;
         })
         .then(runHook("contentsAfter"));
@@ -94,13 +100,15 @@ function doLayouts(settingsInitial) {
     return Promise.resolve(settingsInitial)
         .then(runHook("layoutsBefore"))
         .then((settings) => {
-            settings.sugar.use("metalsmith-handlebars-layouts", {
-                data: ["./handlebars/layouts/data/**/*"],
-                decorators: ["./handlebars/layouts/decorators/**/*.js"],
-                helpers: ["./handlebars/layouts/helpers/**/*.js"],
-                layouts: "./handlebars/layouts/",
-                partials: ["./handlebars/layouts/partials/**/*"]
-            });
+            settings.sugar.use(
+                require("metalsmith-handlebars-layouts")({
+                    data: ["./handlebars/layouts/data/**/*"],
+                    decorators: ["./handlebars/layouts/decorators/**/*.js"],
+                    helpers: ["./handlebars/layouts/helpers/**/*.js"],
+                    layouts: "./handlebars/layouts/",
+                    partials: ["./handlebars/layouts/partials/**/*"]
+                })
+            );
 
             return settings;
         })
@@ -113,7 +121,9 @@ function doCss(settingsInitial) {
         .then((settings) => {
             return req("atomizer").then(
                 (atomizer) => {
-                    settings.sugar.use("metalsmith-atomizer", atomizer);
+                    settings.sugar.use(
+                        require("metalsmith-atomizer")(atomizer)
+                    );
 
                     return settings;
                 },
@@ -121,7 +131,9 @@ function doCss(settingsInitial) {
             );
         })
         .then((settings) => {
-            settings.sugar.use("@fidian/metalsmith-less", { removeSource: true });
+            settings.sugar.use(
+                require("@fidian/metalsmith-less")({ removeSource: true })
+            );
 
             return settings;
         })
@@ -134,10 +146,12 @@ function doRedirects(settingsInitial) {
         .then((settings) => {
             return req("redirects").then(
                 (redirects) => {
-                    settings.sugar.use("@fidian/metalsmith-redirect", {
-                        htmlExtensions: [".htm", ".html"],
-                        redirections: redirects
-                    });
+                    settings.sugar.use(
+                        require("@fidian/metalsmith-redirect")({
+                            htmlExtensions: [".htm", ".html"],
+                            redirections: redirects
+                        })
+                    );
 
                     return settings;
                 },
@@ -152,11 +166,13 @@ function doServe(settings) {
         return Promise.resolve(settings)
             .then(runHook("serveBefore"))
             .then((settings) => {
-                settings.sugar.use("@fidian/metalsmith-serve", {
-                    http_error_files: {
-                        404: "/404.html"
-                    }
-                });
+                settings.sugar.use(
+                    require("@fidian/metalsmith-serve")({
+                        http_error_files: {
+                            404: "/404.html"
+                        }
+                    })
+                );
 
                 return settings;
             })
