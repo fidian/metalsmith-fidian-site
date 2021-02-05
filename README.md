@@ -18,7 +18,9 @@ This package does that for you.
 Installation
 ------------
 
-First, install the package.
+Want the quick way to get going? Look at [metalsmith-site-example](https://github.com/fidian/metalsmith-site-example).
+
+Prefer to do this step by step? Cool with me. First, install the package.
 
 ```bash
 npm install --save @fidian/metalsmith-site
@@ -137,7 +139,15 @@ Recipes
 
 ### Modifying metadata
 
-If you want to have dynamic metadata, such as adding a build date, you can accomplish the goal with the `metadataAfter` hook.
+If you want to have dynamic metadata, such as adding a build date, you can accomplish in two ways. One would be to use `default-metadata.js`.
+
+```
+module.exports = {
+    buildDate: new Date()
+};
+```
+
+Another way would be to leverage the `metadataAfter` hook.
 
 ```
 const metalsmithSite = require('@fidian/metalsmith-site');
