@@ -61,7 +61,7 @@ Project Structure
 
 For this to work, here is how the repository should be laid out.
 
-* `atomizer.[js,json]` - Atomizer configuration object. Without this file, atomizer won't run.
+* `atomizer.[js,json]` - Atomizer configuration object. Without this file, atomizer won't run. The contents of this file are passed directly to [`metalsmith-atomizer`](https://www.npmjs.com/package/metalsmith-atomizer), allowing you to change the defaults easily.
 * `build/` - Where files will be written. This file is created if it does not exist.
 * `default-metadata.[js,json]` - Results in an object used for each file's default metadata.
 * `handlebars/` - Stores the partials and helpers used for both the page generation and the layout wrapping.
