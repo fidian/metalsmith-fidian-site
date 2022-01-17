@@ -1,13 +1,13 @@
 {
     "name": "@fidian/metalsmith-site",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "dependencies": {
         "@fidian/metalsmith-less": "^3.0.0",
         "@fidian/metalsmith-redirect": "^3.2.0",
         "@fidian/metalsmith-serve": "^0.1.1",
-        "debug": "^4.3.1",
-        "glob-watcher": "^5.0.5",
-        "livereload": "^0.9.1",
+        "debug": "^4.3.3",
+        "glob-watcher": "^2.0.0",
+        "livereload": "^0.9.3",
         "metalsmith-ancestry": "^1.5.2",
         "metalsmith-atomizer": "^1.1.0",
         "metalsmith-data-loader": "^1.1.5",
