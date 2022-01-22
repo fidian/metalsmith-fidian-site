@@ -286,7 +286,7 @@ module.exports = {
                                     // or thousands of reloads and effectively freezing the
                                     // browser for several seconds.
                                     reloadServer.refresh("");
-                                    done(err);
+                                    done();
                                 },
                                 (err) => {
                                     console.error(err);
