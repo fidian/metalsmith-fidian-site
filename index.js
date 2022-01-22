@@ -286,11 +286,11 @@ module.exports = {
                                     // or thousands of reloads and effectively freezing the
                                     // browser for several seconds.
                                     reloadServer.refresh("");
-                                    done();
+                                    buildComplete();
                                 },
                                 (err) => {
                                     console.error(err);
-                                    done(err);
+                                    buildComplete(err);
                                 }
                             )
                     );
