@@ -51,7 +51,7 @@ function doMetadata(settingsInitial) {
             return req("default-metadata").then(
                 (metadata) => {
                     settings.sugar.use(
-                        require("metalsmith-default-values")([
+                        require("@metalsmith/default-values")([
                             {
                                 pattern: "**/*",
                                 defaults: metadata
@@ -87,7 +87,7 @@ function doContents(settingsInitial) {
                     partials: ["./handlebars/pages/partials/**/*"]
                 })
             );
-            settings.sugar.use(require("metalsmith-markdown")());
+            settings.sugar.use(require("./plugins/markdown")());
             settings.sugar.use(
                 require("metalsmith-rename")([[/\.md$/, ".html"]])
             );
@@ -260,7 +260,7 @@ module.exports = {
 
         if (process.env.SERVE || config.serve) {
             const livereload = require("livereload");
-            const watch = require("glob-watcher");
+            const watch = require("./plugins/glob-watcher");
             const reloadServer = livereload.createServer();
 
             build(config, true, true).then(
