@@ -1,6 +1,6 @@
 {
     "name": "@fidian/metalsmith-site",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "dependencies": {
         "@fidian/metalsmith-less": "^4.1.1",
         "@fidian/metalsmith-redirect": "^3.4.1",
@@ -14,8 +14,8 @@
         "metalsmith-ancestry": "^1.6.1",
         "metalsmith-atomizer": "^1.2.1",
         "metalsmith-data-loader": "^1.2.1",
-        "metalsmith-handlebars-contents": "^1.2.1",
-        "metalsmith-handlebars-layouts": "^1.1.1",
+        "metalsmith-handlebars-contents": "^1.2.2",
+        "metalsmith-handlebars-layouts": "^1.1.2",
         "metalsmith-relative-links": "^1.2.0",
         "metalsmith-rename": "^1.0.0",
         "metalsmith-rootpath": "^1.0.4"

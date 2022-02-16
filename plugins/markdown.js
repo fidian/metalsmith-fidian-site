@@ -26,8 +26,9 @@ SOFTWARE.
 /* A copy of @metalsmith/markdown. This is added to the project to update
  * dependent libraries to remove warnings about vulnerabilities. */
 
+const pluginName = 'metalsmith-site/plugins/markdown';
 const { basename, dirname, extname, join } = require("path");
-const debug = require("debug")("@metalsmith/markdown");
+const debug = require("debug")(pluginName);
 const marked = require("marked");
 const metalsmithPluginKit = require("metalsmith-plugin-kit");
 
@@ -53,23 +54,24 @@ const plugin = function (options) {
 
             if ("." != dir) html = join(dir, html);
 
-            debug("converting file: %s", file);
-            const str = marked(data.contents.toString(), options);
+            debug("Converting file: %s", file);
+            const str = marked.parse(data.contents.toString(), options);
             data.contents = Buffer.from(str);
 
             for (const key of keys) {
                 if (data[key]) {
-                    data[key] = marked(data[key].toString(), options);
+                    data[key] = marked.parse(data[key].toString(), options);
                 }
             }
 
             delete files[file];
-            metalsmithPluginKit.addFile(files, html, data);
+            files[html] = data;
         },
-        match: '*.{md|markdown}',
+        match: '*.{md,markdown}',
         matchOptions: {
             basename: true
-        }
+        },
+        name: pluginName
     });
 };
 
