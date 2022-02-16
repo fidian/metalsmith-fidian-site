@@ -29,6 +29,7 @@ SOFTWARE.
 const { basename, dirname, extname, join } = require("path");
 const debug = require("debug")("@metalsmith/markdown");
 const marked = require("marked");
+const metalsmithPluginKit = require("metalsmith-plugin-kit");
 
 /**
  * @typedef Options
@@ -65,7 +66,10 @@ const plugin = function (options) {
             delete files[file];
             metalsmithPluginKit.addFile(files, html, data);
         },
-        match: '*.{md|markdown}'
+        match: '*.{md|markdown}',
+        matchOptions: {
+            basename: true
+        }
     });
 };
 

@@ -1,4 +1,4 @@
-const metalsmithSugar = require("metalsmith-sugar");
+const metalsmithSugar = require("@fidian/metalsmith-sugar");
 const path = require("path");
 const debug = require("debug")("metalsmith-site");
 
