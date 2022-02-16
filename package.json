@@ -1,6 +1,6 @@
 {
     "name": "@fidian/metalsmith-site",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "dependencies": {
         "@fidian/metalsmith-less": "^4.1.1",
         "@fidian/metalsmith-redirect": "^3.4.1",
