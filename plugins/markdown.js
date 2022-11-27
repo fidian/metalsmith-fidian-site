@@ -47,11 +47,7 @@ const handlebarsTagLiteralRule = /^\{\{(?:\{.*?\}|.*?)\}\}+/; // Regex for the c
 const handlebarsTagLiteral = {
     name: "handlebarsTag",
     level: "block",
-    start: (src) => {
-        console.log(src);
-
-        return src.indexOf("{{"); // Hint to Marked.js to stop and check for a match
-    },
+    start: (src) => src.indexOf("{{"), // Hint to Marked.js to stop and check for a match
     tokenizer: (src, tokens) => {
         const match = handlebarsTagLiteralRule.exec(src);
 
