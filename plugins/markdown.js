@@ -27,7 +27,7 @@ SOFTWARE.
  * dependent libraries to remove warnings about vulnerabilities. Also, this
  * does not rename *.md to *.html any longer. */
 
-const pluginName = 'metalsmith-site/plugins/markdown';
+const pluginName = "metalsmith-site/plugins/markdown";
 const { basename, dirname, extname, join } = require("path");
 const debug = require("debug")(pluginName);
 const marked = require("marked");
@@ -37,6 +37,36 @@ const metalsmithPluginKit = require("metalsmith-plugin-kit");
  * @typedef Options
  * @property {String[]} keys - Key names of file metadata to render to HTML
  **/
+
+/**
+ * Don't encode within handlebars
+ *
+ * Based on https://github.com/markedjs/marked/issues/269#issuecomment-1173177983
+ */
+const handlebarsTagLiteralRule = /^\{\{(?:\{.*?\}|.*?)\}\}+/; // Regex for the complete token, anchor to string start
+const handlebarsTagLiteral = {
+    name: "handlebarsTag",
+    level: "block",
+    start: (src) => {
+        console.log(src);
+
+        return src.indexOf("{{"); // Hint to Marked.js to stop and check for a match
+    },
+    tokenizer: (src, tokens) => {
+        const match = handlebarsTagLiteralRule.exec(src);
+
+        if (match) {
+            return {
+                // Token to generate
+                type: "handlebarsTag", // Should match "name" above
+                raw: match[0], // Text to consume from the source
+                text: match[0] // Additional custom properties
+            };
+        }
+    },
+    renderer: (token) => token.text
+};
+marked.use({ extensions: [handlebarsTagLiteral]});
 
 /**
  * Metalsmith plugin to convert markdown files.
@@ -61,7 +91,7 @@ const plugin = function (options) {
                 }
             }
         },
-        match: '**/*.md',
+        match: "**/*.md",
         name: pluginName
     });
 };
