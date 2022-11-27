@@ -79,15 +79,19 @@ function doContents(settingsInitial) {
     return Promise.resolve(settingsInitial)
         .then(runHook("contentsBefore"))
         .then((settings) => {
+            settings.sugar.use(require("./plugins/markdown")());
+            settings.sugar.use(
+                require("./plugins/simple-layouts")(
+                )
+            );
             settings.sugar.use(
                 require("metalsmith-handlebars-contents")({
-                    data: ["./handlebars/pages/data/**/*"],
-                    decorators: ["./handlebars/pages/decorators/**/*.js"],
-                    helpers: ["./handlebars/pages/helpers/**/*.js"],
-                    partials: ["./handlebars/pages/partials/**/*"]
+                    data: ["./handlebars/data/**/*"],
+                    decorators: ["./handlebars/decorators/**/*.js"],
+                    helpers: ["./handlebars/helpers/**/*.js"],
+                    partials: ["./handlebars/partials/**/*"]
                 })
             );
-            settings.sugar.use(require("./plugins/markdown")());
             settings.sugar.use(
                 require("metalsmith-rename")([[/\.md$/, ".html"]])
             );
@@ -96,40 +100,9 @@ function doContents(settingsInitial) {
         .then(runHook("contentsAfter"));
 }
 
-function doLayouts(settingsInitial) {
-    return Promise.resolve(settingsInitial)
-        .then(runHook("layoutsBefore"))
-        .then((settings) => {
-            settings.sugar.use(
-                require("metalsmith-handlebars-layouts")({
-                    data: ["./handlebars/layouts/data/**/*"],
-                    decorators: ["./handlebars/layouts/decorators/**/*.js"],
-                    helpers: ["./handlebars/layouts/helpers/**/*.js"],
-                    layouts: "./handlebars/layouts/",
-                    partials: ["./handlebars/layouts/partials/**/*"]
-                })
-            );
-
-            return settings;
-        })
-        .then(runHook("layoutsAfter"));
-}
-
 function doCss(settingsInitial) {
     return Promise.resolve(settingsInitial)
         .then(runHook("cssBefore"))
-        .then((settings) => {
-            return req("atomizer").then(
-                (atomizer) => {
-                    settings.sugar.use(
-                        require("metalsmith-atomizer")(atomizer)
-                    );
-
-                    return settings;
-                },
-                (e) => settings
-            );
-        })
         .then((settings) => {
             settings.sugar.use(
                 require("@fidian/metalsmith-less")({ removeSource: true })
@@ -225,10 +198,23 @@ function doPostProcess(settings) {
     }
 }
 
+function checkBuildNumber(myBuildNumber, nextFn) {
+    if (myBuildNumber === buildNumber) {
+        return nextFn;
+    }
+
+    throw new Error(`Another build started - aborting build ${muBuildNumber}`);
+}
+
+let buildNumber = 0;
+
 function build(config, serve, clean) {
+    buildNumber += 1;
+    const myBuildNumber = buildNumber;
+
     // Clear the require cache so we can reload content
     Object.keys(require.cache).forEach((key) => delete require.cache[key]);
-    console.log("Build started");
+    console.log(`Build ${myBuildNumber} started`);
     const startTime = Date.now();
 
     return Promise.resolve({
@@ -236,20 +222,19 @@ function build(config, serve, clean) {
         config: config,
         serve: serve
     })
-        .then(doMakeSugar)
-        .then(runHook("buildBefore"))
-        .then(doMetadata)
-        .then(doContents)
-        .then(doLayouts)
-        .then(doCss)
-        .then(doRedirects)
-        .then(doServe)
-        .then(runHook("buildAfter"))
-        .then(doBuild)
-        .then(doPostProcess)
-        .then(() => {
-            console.log(`Build complete, ${Date.now() - startTime}ms`);
-        });
+        .then(checkBuildNumber(myBuildNumber, doMakeSugar))
+        .then(checkBuildNumber(myBuildNumber, runHook("buildBefore")))
+        .then(checkBuildNumber(myBuildNumber, doMetadata))
+        .then(checkBuildNumber(myBuildNumber, doContents))
+        .then(checkBuildNumber(myBuildNumber, doCss))
+        .then(checkBuildNumber(myBuildNumber, doRedirects))
+        .then(checkBuildNumber(myBuildNumber, doServe))
+        .then(checkBuildNumber(myBuildNumber, runHook("buildAfter")))
+        .then(checkBuildNumber(myBuildNumber, doBuild))
+        .then(checkBuildNumber(myBuildNumber, doPostProcess))
+        .then(checkBuildNumber(myBuildNumber, () => {
+            console.log(`Build ${myBuildNumber} complete, ${Date.now() - startTime}ms`);
+        }));
 }
 
 module.exports = {
@@ -269,22 +254,20 @@ module.exports = {
                         "Server started, initial build complete, watching for changes"
                     );
 
-                    // done is used to debounce the changes
                     watch(
                         config.watch || [
                             "./*.js",
                             "./*.json",
                             "./handlebars/**",
+                            "./layouts/**",
                             "./site/**"
                         ],
-                        (done) =>
+                        () =>
                             build(config, false, false).then(
                                 () => {
-                                    // Refreshing everything is better because then
-                                    // hundreds or thousands of messages are not sent to
-                                    // the client, causing the browser to trigger hundreds
-                                    // or thousands of reloads and effectively freezing the
-                                    // browser for several seconds.
+                                    // Refreshing everything is better. It avoids sending
+                                    // hundreds of messages to the client, causing the browser
+                                    // to trigger hundreds of reloads.
                                     reloadServer.refresh("");
                                     buildComplete();
                                 },

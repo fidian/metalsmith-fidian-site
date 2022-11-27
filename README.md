@@ -8,7 +8,7 @@ When trying to get started with a simple [Metalsmith] site, I want a certain set
 * A link function is added allowing automatic HTML link creation between two file objects.
 * Atomizer (Atomic CSS) processes all files to build the necessary CSS.
 * Redirections from old paths that people bookmarked are made.
-* File contents are processed with Handlebars, then processed with Markdown, and then finally wrapped in a layout that is also using Handlebars.
+* File contents are processed with Markdown, wrapped in a simple layout, then processed with Handlebars.
 * Built-in web server and live reloading of all files, data files, and Handlebars files.
 * Ability to hook into the build process to add my own site-specific plugins and configurations.
 
@@ -56,6 +56,20 @@ metalsmithSite.run({
 There are several configuration options listed below so you can configure how the plugins work and add your own functionality at key moments during the build.
 
 
+Upgrade Notes
+-------------
+
+### Version 2
+
+* Removed `metalsmith-atomizer` from the build. It is slower and less effective than [@fidian/acss-live](https://github.com/fidian/acss-live/'), and about the same size to the client.
+
+* Removed `layoutBefore` and `layoutAfter` hooks.
+
+* Removed `metalsmith-handlebars-layouts' and replaced with a very simplistic layouts. Because of this, `handlebars/layouts/` is removed and `handlebars/pages/` now becomes `handlebars/`.
+
+* Addressed problems with concurrent builds.
+
+
 Project Structure
 -----------------
 
@@ -65,16 +79,11 @@ For this to work, here is how the repository should be laid out.
 * `build/` - Where files will be written. This file is created if it does not exist.
 * `default-metadata.[js,json]` - Results in an object used for each file's default metadata.
 * `handlebars/` - Stores the partials and helpers used for both the page generation and the layout wrapping.
-    * `pages/` - Partials and helpers used while content is changed to HTML.
-        * `data/` - Data files to load.
-        * `decorators/` - Handlebars decorators.
-        * `helpers/` - Functions to add.
-        * `partials/` - HTML templates.
-    * `layouts/` - Partials and helpers used exclusively for layout wrapping.
-        * `data/` - Data files to load.
-        * `decorators/` - Handlebars decorators.
-        * `helpers/` - Functions to add.
-        * `partials/` - HTML templates.
+    * `data/` - Data files to load.
+    * `decorators/` - Handlebars decorators.
+    * `helpers/` - Functions to add.
+    * `partials/` - HTML templates.
+* `layouts/` - Wrappers for simple layouts.
 * `metalsmith.js` - The file from above.
 * `node_modules/`
 * `package.json`
@@ -110,8 +119,6 @@ There's also the following properties that are hook functions. They are executed
 * `metadataAfter` (hook function, since 1.0.0)
 * `contentsBefore` (hook function, since 1.0.0)
 * `contentsAfter` (hook function, since 1.0.0)
-* `layoutsBefore` (hook function, since 1.0.0)
-* `layoutsAfter` (hook function, since 1.0.0)
 * `cssBefore` (hook function, since 1.0.0)
 * `cssAfter` (hook function, since 1.0.0)
 * `redirectsBefore` (hook function, since 1.0.0)
@@ -180,7 +187,7 @@ Edit `default-metadata.json`:
 }
 ```
 
-This will wrap all pages in the Mustache template stored as `handlebars/layouts/default-layout.html`. If you want to change one page's layout, you can do that by editing the file's metadata.
+This will wrap all pages in a layout using `layouts/default-layout-before.html` and `layouts/default-layout-after.html`. If you want to change one page's layout, you can do that by editing the file's metadata.
 
 ```
 ---
@@ -188,17 +195,25 @@ title: Sample page that changes the layout
 layout: changed-layout
 ---
 
-Your Markdown goes here for a page. It will be inserted into the layout file `handlebars/layouts/changed-layout.html`.
+Your Markdown goes here for a page. It will be inserted between the layout files `layouts/changed-layout-before.html` and `layouts/changed-layout-after.html`.
 ```
 
-Here's a sample layout file. Note that we use triple braces for `{{{contents}}}` so the HTML isn't escaped.
+Here's two sample layout files to help illustrate the point.
 
 ```
 <!DOCTYPE html>
 <html><head><title>{{title}}</title></head>
-<body>{{{contents}}}</body>
+<body>
+```
+
+That was the `*-before.html` sample and this will be `*-after.html`.
+
+```
+</body>
 </html>
 ```
+
+Handlebars is allowed in these files, but markdown is not.
 
 
 Debugging

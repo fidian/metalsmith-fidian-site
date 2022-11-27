@@ -24,7 +24,8 @@ SOFTWARE.
 */
 
 /* A copy of @metalsmith/markdown. This is added to the project to update
- * dependent libraries to remove warnings about vulnerabilities. */
+ * dependent libraries to remove warnings about vulnerabilities. Also, this
+ * does not rename *.md to *.html any longer. */
 
 const pluginName = 'metalsmith-site/plugins/markdown';
 const { basename, dirname, extname, join } = require("path");
@@ -50,10 +51,6 @@ const plugin = function (options) {
         each: (file, data, files) => {
             const dir = dirname(file);
 
-            let html = basename(file, extname(file)) + ".html";
-
-            if ("." != dir) html = join(dir, html);
-
             debug("Converting file: %s", file);
             const str = marked.parse(data.contents.toString(), options);
             data.contents = Buffer.from(str);
@@ -63,14 +60,8 @@ const plugin = function (options) {
                     data[key] = marked.parse(data[key].toString(), options);
                 }
             }
-
-            delete files[file];
-            files[html] = data;
         },
-        match: '*.{md,markdown}',
-        matchOptions: {
-            basename: true
-        },
+        match: '**/*.md',
         name: pluginName
     });
 };
