@@ -80,10 +80,16 @@ function doContents(settingsInitial) {
         .then(runHook("contentsBefore"))
         .then((settings) => {
             settings.sugar.use(require("./plugins/markdown")());
-            settings.sugar.use(
-                require("./plugins/simple-layouts")(
-                )
-            );
+            return settings;
+        })
+        .then(runHook("contentsAfter"));
+}
+
+function doLayouts(settingsInitial) {
+    return Promise.resolve(settingsInitial)
+        .then(runHook("layoutsBefore"))
+        .then((settings) => {
+            settings.sugar.use(require("./plugins/simple-layouts")());
             settings.sugar.use(
                 require("metalsmith-handlebars-contents")({
                     data: ["./handlebars/data/**/*"],
@@ -97,7 +103,7 @@ function doContents(settingsInitial) {
             );
             return settings;
         })
-        .then(runHook("contentsAfter"));
+        .then(runHook("layoutsAfter"));
 }
 
 function doCss(settingsInitial) {
@@ -198,19 +204,20 @@ function doPostProcess(settings) {
     }
 }
 
-function checkBuildNumber(myBuildNumber, nextFn) {
-    if (myBuildNumber === buildNumber) {
-        return nextFn;
-    }
-
-    throw new Error(`Another build started - aborting build ${muBuildNumber}`);
-}
-
 let buildNumber = 0;
 
 function build(config, serve, clean) {
     buildNumber += 1;
     const myBuildNumber = buildNumber;
+    const checkBuildNumber = (settings) => {
+        if (buildNumber !== myBuildNumber) {
+            throw new Error(
+                `Another build started - aborting build ${myBuildNumber}`
+            );
+        }
+
+        return settings;
+    };
 
     // Clear the require cache so we can reload content
     Object.keys(require.cache).forEach((key) => delete require.cache[key]);
@@ -222,19 +229,32 @@ function build(config, serve, clean) {
         config: config,
         serve: serve
     })
-        .then(checkBuildNumber(myBuildNumber, doMakeSugar))
-        .then(checkBuildNumber(myBuildNumber, runHook("buildBefore")))
-        .then(checkBuildNumber(myBuildNumber, doMetadata))
-        .then(checkBuildNumber(myBuildNumber, doContents))
-        .then(checkBuildNumber(myBuildNumber, doCss))
-        .then(checkBuildNumber(myBuildNumber, doRedirects))
-        .then(checkBuildNumber(myBuildNumber, doServe))
-        .then(checkBuildNumber(myBuildNumber, runHook("buildAfter")))
-        .then(checkBuildNumber(myBuildNumber, doBuild))
-        .then(checkBuildNumber(myBuildNumber, doPostProcess))
-        .then(checkBuildNumber(myBuildNumber, () => {
-            console.log(`Build ${myBuildNumber} complete, ${Date.now() - startTime}ms`);
-        }));
+        .then(checkBuildNumber)
+        .then(doMakeSugar)
+        .then(checkBuildNumber)
+        .then(runHook("buildBefore"))
+        .then(checkBuildNumber)
+        .then(doMetadata)
+        .then(checkBuildNumber)
+        .then(doContents)
+        .then(checkBuildNumber)
+        .then(doCss)
+        .then(checkBuildNumber)
+        .then(doRedirects)
+        .then(checkBuildNumber)
+        .then(doServe)
+        .then(checkBuildNumber)
+        .then(runHook("buildAfter"))
+        .then(checkBuildNumber)
+        .then(doBuild)
+        .then(checkBuildNumber)
+        .then(doPostProcess)
+        .then(checkBuildNumber)
+        .then(() => {
+            console.log(
+                `Build ${myBuildNumber} complete, ${Date.now() - startTime}ms`
+            );
+        });
 }
 
 module.exports = {

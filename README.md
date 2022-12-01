@@ -63,11 +63,11 @@ Upgrade Notes
 
 * Removed `metalsmith-atomizer` from the build. It is slower and less effective than [@fidian/acss-live](https://github.com/fidian/acss-live/'), and about the same size to the client.
 
-* Removed `layoutBefore` and `layoutAfter` hooks.
+* Removed `layoutBefore` and `layoutAfter` hooks. (version 2.0.0 through 2.0.2 only, restored in 2.1.0)
 
 * Removed `metalsmith-handlebars-layouts' and replaced with a very simplistic layouts. Because of this, `handlebars/layouts/` is removed and `handlebars/pages/` now becomes `handlebars/`.
 
-* Addressed problems with concurrent builds.
+* Attempted to addressed problems with concurrent builds.
 
 
 Project Structure
@@ -119,6 +119,8 @@ There's also the following properties that are hook functions. They are executed
 * `metadataAfter` (hook function, since 1.0.0)
 * `contentsBefore` (hook function, since 1.0.0)
 * `contentsAfter` (hook function, since 1.0.0)
+* `layoutsBefore` (hook function, since 1.0.0, removed in 2.0.x, added in 2.1.0)
+* `layoutsAfter` (hook function, since 1.0.0, removed in 2.0.x, added in 2.1.0)
 * `cssBefore` (hook function, since 1.0.0)
 * `cssAfter` (hook function, since 1.0.0)
 * `redirectsBefore` (hook function, since 1.0.0)
