@@ -238,6 +238,8 @@ function build(config, serve, clean) {
         .then(checkBuildNumber)
         .then(doContents)
         .then(checkBuildNumber)
+        .then(doLayouts)
+        .then(checkBuildNumber)
         .then(doCss)
         .then(checkBuildNumber)
         .then(doRedirects)
