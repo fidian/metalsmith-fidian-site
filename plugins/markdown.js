@@ -46,7 +46,7 @@ const metalsmithPluginKit = require("metalsmith-plugin-kit");
 const handlebarsTagLiteralRule = /^\{\{(?:\{.*?\}|.*?)\}\}+/; // Regex for the complete token, anchor to string start
 const handlebarsTagLiteral = {
     name: "handlebarsTag",
-    level: "block",
+    level: "inline",
     start: (src) => src.indexOf("{{"), // Hint to Marked.js to stop and check for a match
     tokenizer: (src, tokens) => {
         const match = handlebarsTagLiteralRule.exec(src);
