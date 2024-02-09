@@ -146,11 +146,7 @@ function doServe(settings) {
             .then(runHook("serveBefore"))
             .then((settings) => {
                 settings.sugar.use(
-                    require("@fidian/metalsmith-serve")({
-                        http_error_files: {
-                            404: "/404.html"
-                        }
-                    })
+                    require("@fidian/metalsmith-serve")()
                 );
 
                 return settings;
