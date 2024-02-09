@@ -122,4 +122,4 @@ function defaultValues(options) {
     };
 }
 
-export default defaultValues;
+module.exports = defaultValues;
