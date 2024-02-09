@@ -48,7 +48,7 @@ function doMetadata(settingsInitial) {
     return Promise.resolve(settingsInitial)
         .then(runHook("metadataBefore"))
         .then((settings) => {
-            return req("default-metadata").then(
+            return req("./plugins/default-metadata").then(
                 (metadata) => {
                     settings.sugar.use(
                         require("@metalsmith/default-values")([
